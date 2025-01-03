@@ -1,0 +1,7 @@
+Flask
+keras
+tensorflow
+numpy
+matplotlib
+scikit-image
+Pillow
