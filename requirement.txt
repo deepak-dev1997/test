@@ -38,6 +38,8 @@ PyQt5_sip
 PySocks 
 soupsieve 
 stack-data 
-sympy tornado 
-tqdm traitlets 
+sympy 
+tornado 
+tqdm 
+traitlets 
 wcwidth
