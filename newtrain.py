@@ -6,10 +6,9 @@ import os
 from tf_keras.callbacks import ModelCheckpoint, EarlyStopping
 from data_generator import DataGenerator  # Import the custom data generator
 from model2 import unet
-from tf_keras.preprocessing.image import ImageDataGenerator,img_to_array
+from tf_keras.preprocessing.image import ImageDataGenerator, img_to_array
 from tf_keras.utils import to_categorical
 from PIL import Image
-
 
 
 def get_num_classes(mask_folder):
@@ -18,11 +17,16 @@ def get_num_classes(mask_folder):
         for file in files:
             if file.endswith(('.png', '.jpg', '.jpeg', '.tif', '.tiff')):
                 mask_path = os.path.join(root, file)
-                mask = np.array(Image.open(mask_path))
+                with Image.open(mask_path) as img:
+                    # Ensure the mask is in grayscale
+                    mask = np.array(img.convert('L')).astype(np.int32)
                 current_max = mask.max()
+                print(f"Processing {mask_path}: max label = {current_max}")
                 if current_max > max_label:
                     max_label = current_max
+    print(f"Final max label: {max_label}")
     return max_label + 1
+
 # Define paths
 train_path = 'train2'  # Base directory containing 'images' and 'labels' folders
 image_folder = 'trainimages'
@@ -42,9 +46,8 @@ aug_dict = dict(
 batch_size = 2
 target_size = (256, 256)
 seed = 1
-num_classes = get_num_classes(mask_folder = os.path.join(train_path, 'maskedimages')) # Updated from 9 to 10
-
-
+num_classes = get_num_classes(mask_folder=os.path.join(train_path, 'maskedimages'))  # Updated from 9 to 10
+print(f"Number of classes: {num_classes}")
 
 # Create ImageDataGenerators
 image_datagen = ImageDataGenerator(**aug_dict, rescale=1./255)
@@ -138,7 +141,6 @@ history = model.fit(
     epochs=epochs,
     callbacks=callbacks
 )
-
 
 # Save the trained model (if not using ModelCheckpoint)
 os.makedirs('saved_models2', exist_ok=True)
