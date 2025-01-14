@@ -1,0 +1,67 @@
+<!-- templates/result.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Segmentation Result</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <style>
+        body {
+            padding-top: 50px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 900px;
+        }
+        .image-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .image-box {
+            margin: 15px;
+            text-align: center;
+        }
+        .image-box img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+        .back-btn {
+            margin-top: 30px;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center">Segmentation Result</h2>
+        <div class="image-container">
+            <div class="image-box">
+                <h5>Original Image</h5>
+                <img src="{{ url_for('uploaded_file', filename=original_image) }}" alt="Original Image">
+            </div>
+            <div class="image-box">
+                <h5>Color Mask</h5>
+                <img src="{{ url_for('mask_file', filename=mask_image) }}" alt="Color Mask">
+            </div>
+            <div class="image-box">
+                <h5>Overlay</h5>
+                <img src="{{ url_for('mask_file', filename=overlay_image) }}" alt="Overlay Image">
+            </div>
+        </div>
+        <div class="back-btn text-center">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Upload Another Image</a>
+        </div>
+    </div>
+    <div class="footer">
+        <p>&copy; 2024 Rooftop Segmentation</p>
+    </div>
+</body>
+</html>
