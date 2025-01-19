@@ -3,30 +3,12 @@
 import matplotlib.pyplot as plt
 import numpy as np 
 import os
-import tensorflow as tf
-from tf_keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
+from tf_keras.callbacks import ModelCheckpoint, EarlyStopping
 from data_generator import DataGenerator  # Import the custom data generator
 from model2 import unet
 from tf_keras.preprocessing.image import ImageDataGenerator, img_to_array
 from tf_keras.utils import to_categorical
-from tf_keras.losses import categorical_crossentropy
-from tf_keras import backend as K
 from PIL import Image
-from tf_keras.metrics import MeanIoU
-from tf_keras.optimizers import Adam
-
-# Define Dice and Combined Loss Functions
-def dice_coef(y_true, y_pred, smooth=1e-6):
-    y_true_f = K.flatten(y_true)
-    y_pred_f = K.flatten(y_pred)
-    intersection = K.sum(y_true_f * y_pred_f)
-    return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
-
-def dice_loss(y_true, y_pred):
-    return 1 - dice_coef(y_true, y_pred)
-
-def combined_loss(y_true, y_pred):
-    return categorical_crossentropy(y_true, y_pred) + dice_loss(y_true, y_pred)
 
 
 def get_num_classes(mask_folder):
@@ -140,22 +122,16 @@ def visualize_generator(generator, batch_size=2, num_classes=10):
 
 # Initialize and compile model
 model = unet(input_size=(256, 256, 4), num_classes=num_classes)
-
-model.compile(optimizer=Adam(learning_rate=1e-4), 
-              loss=combined_loss, 
-              metrics=['accuracy', MeanIoU(num_classes=num_classes)])
-
 model.summary()
 
 # Define training parameters
 epochs = 50
-steps_per_epoch = 500  # Adjust based on dataset size
+steps_per_epoch = 300  # Adjust based on dataset size
 
 # Add callbacks for better training control
 callbacks = [
     EarlyStopping(monitor='loss', patience=10, verbose=1, restore_best_weights=True),
-    ModelCheckpoint(saved_model_path, monitor='loss', save_best_only=True, verbose=1),
-    ReduceLROnPlateau(monitor='loss', factor=0.1, patience=5, min_lr=1e-7, verbose=1)
+    ModelCheckpoint(saved_model_path, monitor='loss', save_best_only=True, verbose=1)
 ]
 
 # Train the model

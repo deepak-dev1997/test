@@ -46,16 +46,44 @@ id_to_label = {int(v): k for k, v in label_mapping.items()}
 # Define a color map for visualization (ensure it aligns with label_mapping)
 COLOR_MAP = {
     0: (0, 0, 0),          # Background - Black
-    1: (255, 0, 0),        # Roof - Blue
+    1: (255, 0, 0),        # Roof - Red
     2: (0, 255, 0),        # Wall - Green
-    3: (0, 0, 255),        # Window - Red
-    4: (255, 255, 0),      # Door - Cyan
+    3: (0, 0, 255),        # Window - Blue
+    4: (255, 255, 0),      # Door - Yellow
     5: (255, 0, 255),      # Chimney - Magenta
-    6: (0, 255, 255),      # Solar Panel - Yellow
+    6: (0, 255, 255),      # Solar Panel - Cyan
     7: (128, 0, 0),        # Garage - Maroon
     8: (0, 128, 0),        # Garden - Dark Green
-    9: (0, 0, 128)         # Balcony - Navy
+    9: (0, 0, 128),        # Balcony - Navy
+    10: (128, 128, 0),     # Obstruction1 - Olive
+    11: (128, 0, 128),     # Obstruction2 - Purple
+    12: (0, 128, 128),     # Obstruction3 - Teal
+    13: (192, 192, 192),   # Obstruction4 - Silver
+    14: (128, 128, 128),   # Obstruction5 - Gray
+    15: (255, 165, 0),     # Obstruction6 - Orange
+    16: (255, 215, 0),     # Obstruction7 - Gold
+    17: (0, 100, 0),       # Obstruction8 - Dark Olive Green
+    18: (255, 20, 147),    # Obstruction9 - Deep Pink
+    100: (75, 0, 130),     # Obstruction100 - Indigo
+    101: (255, 69, 0),     # Obstruction101 - Red Orange
+    102: (255, 105, 180),  # Obstruction102 - Hot Pink
+    103: (112, 128, 144),  # Obstruction103 - Slate Gray
+    104: (255, 140, 0),    # Obstruction104 - Dark Orange
+    105: (240, 128, 128),  # Obstruction105 - Light Coral
+    106: (47, 79, 79),     # Obstruction106 - Dark Slate Gray
+    107: (0, 206, 209),    # Obstruction107 - Dark Turquoise
+    108: (148, 0, 211),    # Obstruction108 - Dark Violet
+    109: (255, 20, 147),   # Obstruction109 - Deep Pink (Duplicate, consider change)
+    110: (0, 191, 255),    # Obstruction110 - Deep Sky Blue
+    111: (75, 0, 130),     # Obstruction111 - Indigo (Duplicate, consider change)
+    112: (72, 61, 139),    # Obstruction112 - Dark Slate Blue
+    113: (70, 130, 180),   # Obstruction113 - Steel Blue
+    114: (0, 128, 128),    # Obstruction114 - Teal (Duplicate, consider change)
+    115: (220, 20, 60),    # Obstruction115 - Crimson
+    116: (95, 158, 160),   # Obstruction116 - Cadet Blue
+    117: (0,192,254)
 }
+
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -154,4 +182,4 @@ def mask_file(filename):
     return send_from_directory(app.config['MASK_FOLDER'], filename)
 
 if __name__ == '__main__':
-    app.run(debug=False, host="0.0.0.0")
+    app.run(debug=True)
