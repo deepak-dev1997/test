@@ -42,5 +42,5 @@ def visualize_masks(image_folder, mask_folder, num_samples=30):
 
 if __name__ == "__main__":
     image_folder = './train2/trainimages/'
-    mask_folder = './train2/maskedimages/'
+    mask_folder = './train2/remapped_masks/'
     visualize_masks(image_folder, mask_folder, num_samples=3)
