@@ -9,6 +9,7 @@ import tensorflow as tf
 import cv2
 from PIL import Image
 from tf_keras.models import load_model
+import random
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -43,48 +44,6 @@ with open(LABEL_MAPPING_PATH, 'r') as f:
 # Create inverse mapping (ID to label)
 id_to_label = {int(v): k for k, v in label_mapping.items()}
 
-# Define a color map for visualization (ensure it aligns with label_mapping)
-COLOR_MAP = {
-    0: (0, 0, 0),          # Background - Black
-    1: (255, 0, 0),        # Roof - Red
-    2: (0, 255, 0),        # Wall - Green
-    3: (0, 0, 255),        # Window - Blue
-    4: (255, 255, 0),      # Door - Yellow
-    5: (255, 0, 255),      # Chimney - Magenta
-    6: (0, 255, 255),      # Solar Panel - Cyan
-    7: (128, 0, 0),        # Garage - Maroon
-    8: (0, 128, 0),        # Garden - Dark Green
-    9: (0, 0, 128),        # Balcony - Navy
-    10: (128, 128, 0),     # Obstruction1 - Olive
-    11: (128, 0, 128),     # Obstruction2 - Purple
-    12: (0, 128, 128),     # Obstruction3 - Teal
-    13: (192, 192, 192),   # Obstruction4 - Silver
-    14: (128, 128, 128),   # Obstruction5 - Gray
-    15: (255, 165, 0),     # Obstruction6 - Orange
-    16: (255, 215, 0),     # Obstruction7 - Gold
-    17: (0, 100, 0),       # Obstruction8 - Dark Olive Green
-    18: (255, 20, 147),    # Obstruction9 - Deep Pink
-    100: (75, 0, 130),     # Obstruction100 - Indigo
-    101: (255, 69, 0),     # Obstruction101 - Red Orange
-    102: (255, 105, 180),  # Obstruction102 - Hot Pink
-    103: (112, 128, 144),  # Obstruction103 - Slate Gray
-    104: (255, 140, 0),    # Obstruction104 - Dark Orange
-    105: (240, 128, 128),  # Obstruction105 - Light Coral
-    106: (47, 79, 79),     # Obstruction106 - Dark Slate Gray
-    107: (0, 206, 209),    # Obstruction107 - Dark Turquoise
-    108: (148, 0, 211),    # Obstruction108 - Dark Violet
-    109: (255, 20, 147),   # Obstruction109 - Deep Pink (Duplicate, consider change)
-    110: (0, 191, 255),    # Obstruction110 - Deep Sky Blue
-    111: (75, 0, 130),     # Obstruction111 - Indigo (Duplicate, consider change)
-    112: (72, 61, 139),    # Obstruction112 - Dark Slate Blue
-    113: (70, 130, 180),   # Obstruction113 - Steel Blue
-    114: (0, 128, 128),    # Obstruction114 - Teal (Duplicate, consider change)
-    115: (220, 20, 60),    # Obstruction115 - Crimson
-    116: (95, 158, 160),   # Obstruction116 - Cadet Blue
-    117: (0,192,254)
-}
-
-
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -110,11 +69,26 @@ def predict_mask(image):
 
 def create_color_mask(pred_mask):
     """
-    Convert the predicted mask to a color mask.
+    Convert the predicted mask to a color mask with unique colors for each instance.
     """
     color_mask = np.zeros((pred_mask.shape[0], pred_mask.shape[1], 3), dtype=np.uint8)
-    for class_id, color in COLOR_MAP.items():
-        color_mask[pred_mask == class_id] = color
+
+    unique_labels = np.unique(pred_mask)
+    unique_labels = unique_labels[unique_labels != 0]  # Assuming 0 is background
+
+    for label in unique_labels:
+        # Create a binary mask for the current label
+        binary_mask = (pred_mask == label).astype(np.uint8)
+
+        # Find connected components (instances) in the binary mask
+        num_labels, labels_im = cv2.connectedComponents(binary_mask)
+
+        for instance in range(1, num_labels):  # Start from 1 to skip the background
+            # Generate a random color for each instance
+            color = [random.randint(0, 255) for _ in range(3)]
+            # Assign the color to the corresponding pixels in the color mask
+            color_mask[labels_im == instance] = color
+
     return color_mask
 
 def overlay_masks(original_image_path, color_mask, output_path, alpha=0.5):
@@ -153,7 +127,7 @@ def index():
             # Predict the mask
             pred_mask = predict_mask(image)
             
-            # Create a color mask
+            # Create a color mask with unique colors for each instance
             color_mask = create_color_mask(pred_mask)
             
             # Save the color mask
