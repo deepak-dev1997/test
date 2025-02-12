@@ -43,7 +43,7 @@ aug_dict = dict(
     fill_mode='nearest'          # Points outside the boundaries are filled
 )
 
-batch_size = 2
+batch_size = 4
 target_size = (256, 256)
 seed = 1
 num_classes = get_num_classes(mask_folder=os.path.join(train_path, 'maskedimages'))  # Updated from 9 to 10
@@ -125,12 +125,12 @@ model = unet(input_size=(256, 256, 4), num_classes=num_classes)
 model.summary()
 
 # Define training parameters
-epochs = 50
-steps_per_epoch = 300  # Adjust based on dataset size
+epochs = 150
+steps_per_epoch = 500  # Adjust based on dataset size
 
 # Add callbacks for better training control
 callbacks = [
-    EarlyStopping(monitor='loss', patience=10, verbose=1, restore_best_weights=True),
+    EarlyStopping(monitor='loss', patience=15, verbose=1, restore_best_weights=True),
     ModelCheckpoint(saved_model_path, monitor='loss', save_best_only=True, verbose=1)
 ]
 
