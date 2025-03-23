@@ -44,7 +44,7 @@ aug_dict = dict(
 )
 
 batch_size = 4
-target_size = (256, 256)
+target_size = (512, 512)
 seed = 1
 num_classes = get_num_classes(mask_folder=os.path.join(train_path, 'maskedimages'))  # Updated from 9 to 10
 print(f"Number of classes: {num_classes}")
@@ -121,7 +121,7 @@ def visualize_generator(generator, batch_size=2, num_classes=10):
 # visualize_generator(myGene, batch_size, num_classes)
 
 # Initialize and compile model
-model = unet(input_size=(256, 256, 4), num_classes=num_classes)
+model = unet(input_size=(512, 512, 4), num_classes=num_classes)
 model.summary()
 
 # Define training parameters

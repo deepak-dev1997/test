@@ -5,7 +5,7 @@ from tf_keras import Input
 from tf_keras.layers import Conv2D , MaxPooling2D, concatenate , Conv2DTranspose, Dropout
 from tf_keras.optimizers import Adam
 
-def unet(input_size=(256, 256, 4), num_classes=21):  # Updated num_classes to 10
+def unet(input_size=(512, 512, 4), num_classes=21):  # Updated num_classes to 10
     inputs = Input(input_size)
     
     # Encoder
@@ -17,8 +17,8 @@ def unet(input_size=(256, 256, 4), num_classes=21):  # Updated num_classes to 10
     c2 = Conv2D(128, 3, activation='relu', padding='same')(c2)
     p2 = MaxPooling2D()(c2)
     
-    c3 = Conv2D(256, 3, activation='relu', padding='same')(p2)
-    c3 = Conv2D(256, 3, activation='relu', padding='same')(c3)
+    c3 = Conv2D(512, 3, activation='relu', padding='same')(p2)
+    c3 = Conv2D(512, 3, activation='relu', padding='same')(c3)
     p3 = MaxPooling2D()(c3)
     
     c4 = Conv2D(512, 3, activation='relu', padding='same')(p3)
@@ -35,10 +35,10 @@ def unet(input_size=(256, 256, 4), num_classes=21):  # Updated num_classes to 10
     c6 = Conv2D(512, 3, activation='relu', padding='same')(u6)
     c6 = Conv2D(512, 3, activation='relu', padding='same')(c6)
     
-    u7 = Conv2DTranspose(256, 2, strides=(2, 2), padding='same')(c6)
+    u7 = Conv2DTranspose(512, 2, strides=(2, 2), padding='same')(c6)
     u7 = concatenate([u7, c3])
-    c7 = Conv2D(256, 3, activation='relu', padding='same')(u7)
-    c7 = Conv2D(256, 3, activation='relu', padding='same')(c7)
+    c7 = Conv2D(512, 3, activation='relu', padding='same')(u7)
+    c7 = Conv2D(512, 3, activation='relu', padding='same')(c7)
     
     u8 = Conv2DTranspose(128, 2, strides=(2, 2), padding='same')(c7)
     u8 = concatenate([u8, c2])

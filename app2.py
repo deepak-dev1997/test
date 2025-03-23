@@ -1,5 +1,3 @@
-# app.py
-
 import os
 import json
 import numpy as np
@@ -48,7 +46,7 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def preprocess_image(image_path, target_size=(256, 256)):
+def preprocess_image(image_path, target_size=(512, 512)):
     """
     Load and preprocess the image.
     """
@@ -98,7 +96,7 @@ def overlay_masks(original_image_path, color_mask, output_path, alpha=0.5):
     original = cv2.imread(original_image_path)
     original = cv2.cvtColor(original, cv2.COLOR_BGR2RGB)  # Convert to RGB
     original = cv2.resize(original, (color_mask.shape[1], color_mask.shape[0]))
-    
+
     overlay = cv2.addWeighted(original, alpha, color_mask, 1 - alpha, 0)
     cv2.imwrite(output_path, cv2.cvtColor(overlay, cv2.COLOR_RGB2BGR))  # Save as BGR
     return output_path
@@ -120,32 +118,63 @@ def index():
             filename = secure_filename(file.filename)
             upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(upload_path)
-            
+
             # Preprocess the image
             image = preprocess_image(upload_path)
-            
+
             # Predict the mask
             pred_mask = predict_mask(image)
-            
+
             # Create a color mask with unique colors for each instance
             color_mask = create_color_mask(pred_mask)
-            
+
             # Save the color mask
             mask_filename = 'mask_' + filename
             mask_path = os.path.join(app.config['MASK_FOLDER'], mask_filename)
             cv2.imwrite(mask_path, color_mask)
-            
+
             # Overlay masks on the original image
             overlay_filename = 'overlay_' + filename
             overlay_path = os.path.join(app.config['MASK_FOLDER'], overlay_filename)
             overlay_masks(upload_path, color_mask, overlay_path)
-            
+
             # Pass the filenames to the result template
             return render_template('result.html', original_image=filename, mask_image=mask_filename, overlay_image=overlay_filename)
         else:
             flash('Allowed file types are png, jpg, jpeg, gif')
             return redirect(request.url)
     return render_template('index.html')
+
+@app.route('/api/masked', methods=['POST'])
+def api_masked():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part in the request'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    if file and allowed_file(file.filename):
+        # Secure and create a unique filename to avoid conflicts
+        filename = secure_filename(file.filename)
+        unique_filename = f"{random.randint(0, 100000)}_{filename}"
+        upload_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+        file.save(upload_path)
+
+        # Preprocess the image and predict the mask
+        image = preprocess_image(upload_path)
+        pred_mask = predict_mask(image)
+        color_mask = create_color_mask(pred_mask)
+
+        # Save the color mask to the masks folder
+        mask_filename = 'mask_' + unique_filename
+        mask_path = os.path.join(app.config['MASK_FOLDER'], mask_filename)
+        cv2.imwrite(mask_path, color_mask)
+
+        # Return the masked image file as the API response
+        return send_from_directory(app.config['MASK_FOLDER'], mask_filename)
+    else:
+        return jsonify({'error': 'Allowed file types are png, jpg, jpeg, gif'}), 400
+
+
 
 @app.route('/static/uploads/<filename>')
 def uploaded_file(filename):
@@ -156,4 +185,4 @@ def mask_file(filename):
     return send_from_directory(app.config['MASK_FOLDER'], filename)
 
 if __name__ == '__main__':
-    app.run(debug=False, host="0.0.0.0",port=5001)
+    app.run(debug=False, host="0.0.0.0")
